@@ -1,0 +1,7 @@
+(executable (name test1) (modules test1)
+(ocamlopt_flags (:standard -save-ir-after selection))
+)
+
+(library (name test2) (modules test2)
+ (libraries core core_kernel)
+ (preprocess (pps ppx_jane)))

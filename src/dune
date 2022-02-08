@@ -1,0 +1,13 @@
+(executable
+  (name cli)
+  (public_name llvmize)
+  (package llvmize)
+  (libraries
+  bigstring
+    core
+    compiler-libs.optcomp
+    ocamlcfg
+    llvm llvm.analysis llvm.bitwriter llvm.ipo llvm.irreader llvm.linker
+    llvm.passmgr_builder llvm.scalar_opts llvm.target shexp.process)
+  (preprocess
+   (pps ppx_jane)))

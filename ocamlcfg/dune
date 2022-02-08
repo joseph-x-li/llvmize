@@ -1,0 +1,5 @@
+(library
+  (name ocamlcfg)
+  (public_name llvmize.ocamlcfg)
+  (libraries compiler-libs.optcomp)
+  (preprocess no_preprocessing))
