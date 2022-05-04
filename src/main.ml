@@ -1,5 +1,6 @@
 open Core
 
+module CG = Ocamlcfg.Cfg
 module CL = Ocamlcfg.Cfg_with_layout
 module CP = Ocamlcfg.Passes
 module FF = Ocamlcfg.File_formats
@@ -35,16 +36,70 @@ let dump files ~dot ~show_instr =
   (* iter over a list of filenames; provide, by name, a lambda. *)
   List.iter files ~f:process 
 
-(* let context = Llvm.global_context ()
+(* Print out ONE basic instructon and the stamp of the arguments followed by a 
+  bar then followed by the stamp of the destination. *)
+let print_basic_instr_ln (instr : CG.basic CG.instruction) = 
+  CG.print_basic stdout instr;
+  printf " |";
+  Array.iter instr.arg ~f:(fun reg -> printf " %d" (reg.stamp));
+  printf " ;";
+  Array.iter instr.res ~f:(fun reg -> printf " %d" (reg.stamp));
+  printf "\n"
+
+(* Print out ONE terminator instructon and the stamp of the arguments followed by a 
+  bar then followed by the stamp of the destination. *)
+let print_terminator_instr_ln (instr : CG.terminator CG.instruction) = 
+  CG.print_terminator stdout instr;
+  printf " |";
+  Array.iter instr.arg ~f:(fun reg -> printf " %d" (reg.stamp));
+  printf " ;";
+  Array.iter instr.res ~f:(fun reg -> printf " %d" (reg.stamp));
+  printf "\n"
+
+(* Print a basic block by printing its block label number followed by the basic
+  instructions and finally the terminator instruction *)
+let print_block (lbl : Label.t) (blk : CG.Basic_block.t) = 
+  printf "*****Block %d*****\n" lbl;
+  List.iter (CG.Basic_block.body blk) ~f:(print_basic_instr_ln);
+  print_terminator_instr_ln (CG.Basic_block.terminator blk)
+
+(* Print a CFG by printing its blocks *)
+let print_cfg (g : CL.t) = 
+  let cfg = CL.cfg g in 
+  let nargs = CG.num_args cfg in
+  printf "*****CFG*****\n";
+  printf "fun_name: %s\n" (CG.fun_name cfg);
+  printf "fun_args: %d\n" nargs;
+  CG.iter_blocks cfg ~f:(print_block);
+  ()
+
+let context = Llvm.global_context ()
 let llmodule = Llvm.create_module context "testmodule"
+let builder = Llvm.builder context
+
+(* Instantiate a i64 type *)
 let i64 = Llvm.i64_type context
 
-(* Create a llvm function that takes two i64 and returns their sum 
-   Called incr_int: i64 * i64 -> i64 *)
-let llvm_dummy_func = 
-   let ft = Llvm.function_type i64 (Array.create ~len:2 i64) in
-   Llvm.declare_function "incr_int" ft llmodule 
-   Llvm. *)
+(* Holds a map from stamp(aka int) -> Llvalue *)
+let named_values : (int, Llvm.llvalue) Hashtbl.t = Hashtbl.create (module Int)
+
+(* Translate a CFG by creating a function in Llvm 
+  and  *)
+let ll_cfg (g : CL.t) = 
+  let cfg = CL.cfg g in
+  let funcname = CG.fun_name cfg in
+  let nargs = CG.num_args cfg in
+  let args = CG.get_args cfg in
+  let ft = Llvm.function_type i64 (Array.create ~len:nargs i64) in
+  (*  *)
+  let f = Llvm.declare_function funcname ft llmodule in
+  Array.iteri (Llvm.params f) 
+  ~f:(fun i a -> 
+      let name = args.(i).stamp in 
+      Hashtbl.add_exn named_values ~key:name ~data:a;
+  );
+
+
 
 (* Parse a file and print out the function names and its type *)
 let print_function_names files = 
@@ -59,7 +114,7 @@ let print_function_names files =
       fun uitem -> match uitem with 
         | Linear _ -> ()
         | Data _ -> ()
-        | Cfg g -> let cfg = CL.cfg g in printf "CFG fun_name: %s\n" (Ocamlcfg.Cfg.fun_name cfg)
+        | Cfg g -> print_cfg g
       ) 
     in 
     (* Parse u.for_pack *)

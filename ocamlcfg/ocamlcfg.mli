@@ -26,6 +26,8 @@ module Cfg : sig
 
   val iter_blocks : t -> f:(Label.t -> Basic_block.t -> unit) -> unit
   val get_block : t -> Label.t -> Basic_block.t option
+  val print_basic : out_channel -> basic instruction -> unit
+  val print_terminator : out_channel -> ?sep:string -> terminator instruction -> unit
 
   (** [successor_labels] only returns non-exceptional edges. We need to pass
       [t] because the successor label of terminator (Tailcall Self) is
@@ -35,6 +37,9 @@ module Cfg : sig
   val predecessor_labels : Basic_block.t -> Label.t list
   val fun_name : t -> string
   val entry_label : t -> Label.t
+
+  val num_args : t -> int
+  val get_args : t -> Reg.t array
 end
 
 module Cfg_with_layout : sig

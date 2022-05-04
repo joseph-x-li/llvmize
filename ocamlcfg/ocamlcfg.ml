@@ -16,6 +16,9 @@ module Cfg = struct
   let successor_labels b =
     successor_labels ~normal:true ~exn:false b |> Label.Set.elements
   ;;
+
+  let num_args c = Array.length c.fun_args
+  let get_args c = c.fun_args
 end
 
 module Cfg_with_layout = struct
@@ -31,6 +34,8 @@ module Cfg_with_layout = struct
 
   let of_linear = Linear_to_cfg.run
   let to_linear = Cfg_to_linear.run
+
+  (* let print (c : t) = Cfg_to_linear.print_assembly (cfg c)  *)
 end
 
 module Passes = struct
