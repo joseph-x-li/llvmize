@@ -35,7 +35,7 @@ let main_command =
       and show_instr = flag_dot_show_instr in *)
       if v then set_verbose true;
       if q then set_verbose false;
-      fun () -> Main.print_function_names files)
+      fun () -> Main.change_this_name files)
       (* fun () -> Main.dump files ~dot ~show_instr) *)
 
 let () =

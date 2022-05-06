@@ -19,6 +19,7 @@ module Cfg = struct
 
   let num_args c = Array.length c.fun_args
   let get_args c = c.fun_args
+  let entry_label c = c.entry_label
 end
 
 module Cfg_with_layout = struct

@@ -77,24 +77,42 @@ let context = Llvm.global_context ()
 let llmodule = Llvm.create_module context "testmodule"
 let builder = Llvm.builder context
 
-(* Instantiate a i64 type *)
+(* Instantiate an i64 type and its pointer *)
 let i64 = Llvm.i64_type context
+(* let i64p = Llvm.pointer_type i64 *)
+
 
 (* Holds a map from stamp(aka int) -> Llvalue *)
-let stamp2value : (int, Llvm.llvalue) Hashtbl.t = Hashtbl.create (module Int)
+let stamp2stack : (int, Llvm.llvalue) Hashtbl.t = Hashtbl.create (module Int)
 
-
-(* Find the llvalue corresponding to a stamp or create a fresh llvalue. *)
-let s2v_find_or_add (stamp : int) =
-  Hashtbl.find_or_add 
-    stamp2value 
+(* Find the stack slot corresponding to a stamp or create a stack slot. *)
+let s2s_get_val (stamp : int) =
+  let ptr = Hashtbl.find_or_add 
+    stamp2stack 
     stamp 
-    ~default: (fun () -> Llvm.build_alloca i64 (sprintf "%d" stamp) builder)
+    ~default: (fun () -> Llvm.build_alloca i64 "" builder) in
+  Llvm.build_load ptr "" builder
+
+(* let s2s_get_ptr (stamp : int) =
+  Hashtbl.find_or_add 
+    stamp2stack 
+    stamp 
+    ~default: (fun () -> Llvm.build_alloca i64p "" builder) *)
+
+let s2s_store (dest : int) (llval : Llvm.llvalue) =
+  let ptr = Hashtbl.find_or_add 
+    stamp2stack 
+    dest 
+    ~default: (fun () -> Llvm.build_alloca i64 "" builder) in
+  let _ : Llvm.llvalue = Llvm.build_store llval ptr builder in 
+  ()
+
+(* Find the stack slot corresponding to a stamp or create a stack slot. *)
 
 (* Update the stamp->llvalue mapping due to an addition or something 
   If the stamp is not in the mapping, then add it. *)
-let s2v_update (stamp : int) (newllv : Llvm.llvalue) =
-  Hashtbl.update stamp2value stamp ~f:(fun _ -> newllv)
+(* let s2s_update (stamp : int) (newllv : Llvm.llvalue) =
+  Hashtbl.update stamp2value stamp ~f:(fun _ -> newllv) *)
 
 (* Holds a map from int to llvm.llbasicblock so branching 
   instructions can look up the llbasicblock value here *)
@@ -114,36 +132,32 @@ let l2b_find_or_add (lbl : int) (f: Llvm.llvalue) =
   so we do not actually have to pass in a reference to the current bb (?) *)
 let ll_basic_instr (instr : CG.basic CG.instruction) = 
   (* unpack instruction arguments *)
-  let arg_llv = Array.map instr.arg ~f:(fun reg -> s2v_find_or_add (reg.stamp)) in
+  let arg_llv = Array.map instr.arg ~f:(fun reg -> s2s_get_val (reg.stamp)) in
   (* unpack instruction destinations *)
-  (* let res_llv = Array.map instr.res ~f:(fun reg -> s2v_find_or_add (reg.stamp)) in *)
+  (* let res_llv = Array.map instr.res ~f:(fun reg -> s2s_find_or_add (reg.stamp)) in *)
   (* build the instruction *)
   match instr.desc with 
       Op Move -> 
-      printf "SHIT1\n";
-      let a0 = arg_llv.(0) in
-      let r0 = arg_llv.(0) in
+      let a0 = arg_llv.(0) in 
+      let res_stamp = instr.res.(0).stamp in
       (* Build load from arg then store to res *)
-      let temp = Llvm.build_load a0 "tmp" builder in
-      let _: Llvm.llvalue = Llvm.build_store temp r0 builder in ()
+      s2s_store res_stamp a0;
     | Op Intop Iadd -> 
-      printf "SHIT2\n";
       let a0 = arg_llv.(0) in 
       let a1 = arg_llv.(1) in 
       let res_stamp = instr.res.(0).stamp in 
-      let resllv = Llvm.build_add a0 a1 "addtmp" builder in 
-      s2v_update res_stamp resllv
+      let resllv = Llvm.build_add a0 a1 "" builder in 
+      s2s_store res_stamp resllv;
     | Op Intop_imm (Iadd, n) -> 
-      printf "SHIT3\n";
       let a0 = arg_llv.(0) in 
       let a1 = Llvm.const_int i64 n in
       let res_stamp = instr.res.(0).stamp in 
-      let resllv = Llvm.build_add a0 a1 "addtmp" builder in 
-      s2v_update res_stamp resllv
+      let resllv = Llvm.build_add a0 a1 "" builder in 
+      s2s_store res_stamp resllv;
     | _ -> printf "HIT UNIMPLEMENTED MATCH ARM @ BASIC INSTR\n"; ()
 
 let ll_terminator_instr (f: Llvm.llvalue) (instr : CG.terminator CG.instruction) = 
-  let arg_llv = Array.map instr.arg ~f:(fun reg -> s2v_find_or_add (reg.stamp)) in
+  let arg_llv = Array.map instr.arg ~f:(fun reg -> s2s_get_val (reg.stamp)) in
   match instr.desc with 
     Always nextlbl -> 
       let nextbb = l2b_find_or_add nextlbl f in
@@ -170,7 +184,7 @@ let ll_block (f: Llvm.llvalue) (lbl: Label.t) (blk: CG.Basic_block.t) =
   so we can place those into the named_values *)
 let ll_cfg (g : CL.t) = 
   (* clear stamp2value *)
-  Hashtbl.clear stamp2value;
+  Hashtbl.clear stamp2stack;
   (* clear label2block *)
   Hashtbl.clear label2block;
   (* create the function *)
@@ -185,19 +199,22 @@ let ll_cfg (g : CL.t) =
   let args = CG.get_args cfg in
   let ft = Llvm.function_type i64 (Array.create ~len:nargs i64) in
   let f: Llvm.llvalue = Llvm.declare_function funcname ft llmodule in
-  Array.iteri (Llvm.params f) 
-  ~f:(fun idx llval -> 
-      let stamp = args.(idx).stamp in 
-      Hashtbl.add_exn stamp2value ~key:stamp ~data:llval;
-  );
+  let entry_label = CG.entry_label cfg in
+  let first_block = l2b_find_or_add entry_label f in
+  (* Start at first block *)
+  Llvm.position_at_end first_block builder;
+  (* Build the function arguments 
+     Also add instructions to store arguments *)
+  Array.iteri (Llvm.params f) ~f:(fun idx llval -> s2s_store args.(idx).stamp llval);
   CG.iter_blocks cfg ~f:(ll_block f);
   Llvm_analysis.assert_valid_function f;
+  Llvm.print_module "test.ll" llmodule;
   ()
 
 
 
 (* Parse a file and print out the function names and its type *)
-let print_function_names files = 
+let change_this_name files = 
   let process file = 
     printf "Parsing %s\n" file;
     let u, _ = FF.restore file in 
@@ -209,7 +226,7 @@ let print_function_names files =
       fun uitem -> match uitem with 
         | Linear _ -> ()
         | Data _ -> ()
-        | Cfg g -> print_cfg g; ll_cfg g
+        | Cfg g -> if false then print_cfg g else ll_cfg g
       ) 
     in 
     (* Parse u.for_pack *)
