@@ -130,7 +130,6 @@ let l2b_find_or_add (lbl : int) (f: Llvm.llvalue) =
     lbl 
     ~default: (fun () -> Llvm.append_block context (sprintf "%d" lbl) f)
 
-
 (* Take a basic instruction and build it into the current basic block 
   It uses the global variable builder which writes to the current basic block
   so we do not actually have to pass in a reference to the current bb (?) *)
@@ -146,19 +145,61 @@ let ll_basic_instr (instr : CG.basic CG.instruction) =
       let res_stamp = instr.res.(0).stamp in
       (* Build load from arg then store to res *)
       s2s_store res_stamp a0;
-    | Op Intop Iadd -> 
+    | Op Intop op -> 
       let a0 = arg_llv.(0) in 
       let a1 = arg_llv.(1) in 
       let res_stamp = instr.res.(0).stamp in 
-      let resllv = Llvm.build_add a0 a1 "" builder in 
+      let gen_op generator = generator a0 a1 "" builder in 
+      let resllv = match op with 
+        | Iadd -> gen_op Llvm.build_add
+        | Isub -> gen_op Llvm.build_sub
+        | Imul -> gen_op Llvm.build_mul
+        (* | Imulh { signed } -> gen_op (if signed then Llvm.build_mulh else Llvm.build_mulhu) *)
+        | Idiv -> gen_op Llvm.build_sdiv
+        | Imod -> gen_op Llvm.build_srem
+        | Iand -> gen_op Llvm.build_and
+        | Ior -> gen_op Llvm.build_or
+        | Ixor -> gen_op Llvm.build_xor
+        | Ilsl -> gen_op Llvm.build_shl
+        | Ilsr -> gen_op Llvm.build_lshr
+        | Iasr -> gen_op Llvm.build_ashr
+        (* | Ipopcnt -> " pop "
+        | Iclz _ -> " clz "
+        | Ictz _ -> " ctz "
+        | Icomp cmp -> intcomp cmp
+        | Icheckbound -> assert false *)
+        | _ -> gen_op Llvm.build_add
+      in
       s2s_store res_stamp resllv;
-    | Op Intop_imm (Iadd, n) -> 
+    | Op Intop_imm (op, n) -> 
       let a0 = arg_llv.(0) in 
       let a1 = Llvm.const_int i64 n in
       let res_stamp = instr.res.(0).stamp in 
-      let resllv = Llvm.build_add a0 a1 "" builder in 
+      let gen_op generator = generator a0 a1 "" builder in 
+      let resllv = match op with 
+        | Iadd -> gen_op Llvm.build_add
+        | Isub -> gen_op Llvm.build_sub
+        | Imul -> gen_op Llvm.build_mul
+        (* | Imulh { signed } -> gen_op (if signed then Llvm.build_mulh else Llvm.build_mulhu) *)
+        | Idiv -> gen_op Llvm.build_sdiv
+        | Imod -> gen_op Llvm.build_srem
+        | Iand -> gen_op Llvm.build_and
+        | Ior -> gen_op Llvm.build_or
+        | Ixor -> gen_op Llvm.build_xor
+        | Ilsl -> gen_op Llvm.build_shl
+        | Ilsr -> gen_op Llvm.build_lshr
+        | Iasr -> gen_op Llvm.build_ashr
+        (* | Ipopcnt -> " pop "
+        | Iclz _ -> " clz "
+        | Ictz _ -> " ctz "
+        | Icomp cmp -> intcomp cmp
+        | Icheckbound -> assert false *)
+        | _ -> gen_op Llvm.build_add
+      in
       s2s_store res_stamp resllv;
-    | _ -> printf "HIT UNIMPLEMENTED MATCH ARM @ BASIC INSTR\n"; ()
+    | _ -> printf "HIT UNIMPLEMENTED MATCH ARM @ BASIC INSTR\n"; 
+           printf "Problematic instruction: \n"; 
+           print_basic_instr_ln instr; ()
 
 let ll_terminator_instr (f: Llvm.llvalue) (instr : CG.terminator CG.instruction) = 
   let arg_llv = Array.map instr.arg ~f:(fun reg -> s2s_get_val (reg.stamp)) in
@@ -194,6 +235,7 @@ let ll_cfg (g : CL.t) =
   (* create the function *)
   let cfg = CL.cfg g in
   let funcname = CG.fun_name cfg in
+  let () = printf "Translating Function %s\n" funcname; in
   (* Return early if function name is "camlTest1__entry" 
   because it contains instructions that I have no clue how to translate 
   like const_symbol? (function pointers for vtable?)
@@ -228,7 +270,7 @@ let change_this_name files =
     printf "items: \n"; 
     let _ : unit list = List.map u.items ~f:(
       fun uitem -> match uitem with 
-        | Linear _ -> ()
+        | Linear lg -> ll_cfg (CL.of_linear ~preserve_orig_labels:true lg)
         | Data _ -> ()
         | Cfg g -> if false then print_cfg g else ll_cfg g
       ) 

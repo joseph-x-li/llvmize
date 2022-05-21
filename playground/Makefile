@@ -4,6 +4,7 @@ frontend:
 	ocamlopt test1.ml -o t1.exe -S -dsel -dump-into-file -save-ir-after selection -dstartup -verbose
 # save after selection, scheduling, simplify_cfg
 
+# ../_build/install/default/bin/llvmize test1.cmir-linear
 llvmize: frontend
 	../_build/install/default/bin/llvmize test1.cmir-cfg-sel
 
