@@ -1,0 +1,23 @@
+*** After instruction selection
+camlTest1__incr_261(R/0[%rax]) {test1.ml:1,9-18}
+  x/29 := R/0[%rax]
+  I/30 := x/29
+  I/30 := I/30 + 2{test1.ml:1,13-18}
+  R/0[%rax] := I/30
+  return R/0[%rax]
+*** After instruction selection
+camlTest1__ident_263(R/0[%rax]) {test1.ml:6,10-15}
+  x/29 := R/0[%rax]
+  R/0[%rax] := x/29
+  return R/0[%rax]
+*** After instruction selection
+camlTest1__entry()
+  incr/29 := "camlTest1__2"
+  I/30 := "camlTest1"
+  val[I/30] := incr/29 (init)
+  ident/31 := "camlTest1__1"
+  I/32 := "camlTest1"
+  val[I/32 + 8] := ident/31 (init)
+  I/33 := 1
+  R/0[%rax] := I/33
+  return R/0[%rax]

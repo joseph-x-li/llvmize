@@ -82,6 +82,10 @@ let i64 = Llvm.i64_type context
 (* let i64p = Llvm.pointer_type i64 *)
 
 
+
+(* Access the entry block of a function *)
+(* let entry_block = Llvm.entry_block llmodule *) 
+
 (* Holds a map from stamp(aka int) -> Llvalue *)
 let stamp2stack : (int, Llvm.llvalue) Hashtbl.t = Hashtbl.create (module Int)
 

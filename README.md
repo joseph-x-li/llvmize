@@ -1,7 +1,4 @@
-todo
-# Important files
-`/home/joseph/.opam/dev/.opam-switch/sources/ocaml-variants/backend/cfg/cfg_intf.ml`
+# Read Me
 
-`/home/joseph/.opam/dev/.opam-switch/sources/ocaml-variants/backend/cfg/cfg.ml`
-
-`/home/joseph/.opam/dev/lib/ocaml/compiler-libs/cfg.mli`
+ 1) Clone this git repo
+ 2) 

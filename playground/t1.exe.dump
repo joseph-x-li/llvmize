@@ -1,0 +1,253 @@
+*** After instruction selection
+caml_program()
+  call "camlCamlinternalFormatBasics__entry" 
+  I/29 := "caml_globals_inited"
+  [I/29] +:= 1
+  call "camlCamlinternalAtomic__entry" 
+  I/30 := "caml_globals_inited"
+  [I/30] +:= 1
+  call "camlStdlib__entry" 
+  I/31 := "caml_globals_inited"
+  [I/31] +:= 1
+  call "camlTest1__entry" 
+  I/32 := "caml_globals_inited"
+  [I/32] +:= 1
+  call "camlStd_exit__entry" 
+  I/33 := "caml_globals_inited"
+  [I/33] +:= 1
+  I/34 := 1
+  R/0[%rax] := I/34
+  return R/0[%rax]
+*** After instruction selection
+caml_curry4(R/0[%rax] R/1[%rbx])
+  arg/29 := R/0[%rax]
+  clos/30 := R/1[%rbx]
+  V/31 := alloc 48
+  [V/31 + -8] := 5367 (init)
+  I/32 := "caml_curry4_1"
+  val[V/31] := I/32 (init)
+  I/33 := 216172782113783815
+  val[V/31 + 8] := I/33 (init)
+  I/34 := "caml_curry4_1_app"
+  val[V/31 + 16] := I/34 (init)
+  val[V/31 + 24] := arg/29 (init)
+  val[V/31 + 32] := clos/30 (init)
+  R/0[%rax] := V/31
+  return R/0[%rax]
+*** After instruction selection
+caml_curry4_1_app(R/0[%rax] R/1[%rbx] R/2[%rdi] R/3[%rsi])
+  arg2/29 := R/0[%rax]
+  arg3/30 := R/1[%rbx]
+  arg4/31 := R/2[%rdi]
+  clos/32 := R/3[%rsi]
+  clos/33 := val[clos/32 + 32]
+  V/34 := val[clos/32 + 24]
+  V/35 := val[clos/33 + 16]
+  R/0[%rax] := V/34
+  R/1[%rbx] := arg2/29
+  R/2[%rdi] := arg3/30
+  R/3[%rsi] := arg4/31
+  R/4[%rdx] := clos/33
+  tailcall V/35 R/0[%rax] R/1[%rbx] R/2[%rdi] R/3[%rsi] R/4[%rdx]
+*** After instruction selection
+caml_curry4_1(R/0[%rax] R/1[%rbx])
+  arg/29 := R/0[%rax]
+  clos/30 := R/1[%rbx]
+  V/31 := alloc 48
+  [V/31 + -8] := 5367 (init)
+  I/32 := "caml_curry4_2"
+  val[V/31] := I/32 (init)
+  I/33 := 144115188075855879
+  val[V/31 + 8] := I/33 (init)
+  I/34 := "caml_curry4_2_app"
+  val[V/31 + 16] := I/34 (init)
+  val[V/31 + 24] := arg/29 (init)
+  val[V/31 + 32] := clos/30 (init)
+  R/0[%rax] := V/31
+  return R/0[%rax]
+*** After instruction selection
+caml_curry4_2_app(R/0[%rax] R/1[%rbx] R/2[%rdi])
+  arg3/29 := R/0[%rax]
+  arg4/30 := R/1[%rbx]
+  clos/31 := R/2[%rdi]
+  clos/32 := val[clos/31 + 32]
+  clos/33 := val[clos/32 + 32]
+  V/34 := val[clos/31 + 24]
+  V/35 := val[clos/32 + 24]
+  V/36 := val[clos/33 + 16]
+  R/0[%rax] := V/35
+  R/1[%rbx] := V/34
+  R/2[%rdi] := arg3/29
+  R/3[%rsi] := arg4/30
+  R/4[%rdx] := clos/33
+  tailcall V/36 R/0[%rax] R/1[%rbx] R/2[%rdi] R/3[%rsi] R/4[%rdx]
+*** After instruction selection
+caml_curry4_2(R/0[%rax] R/1[%rbx])
+  arg/29 := R/0[%rax]
+  clos/30 := R/1[%rbx]
+  V/31 := alloc 40
+  [V/31 + -8] := 4343 (init)
+  I/32 := "caml_curry4_3"
+  val[V/31] := I/32 (init)
+  I/33 := 72057594037927941
+  val[V/31 + 8] := I/33 (init)
+  val[V/31 + 16] := arg/29 (init)
+  val[V/31 + 24] := clos/30 (init)
+  R/0[%rax] := V/31
+  return R/0[%rax]
+*** After instruction selection
+caml_curry4_3(R/0[%rax] R/1[%rbx])
+  arg/29 := R/0[%rax]
+  clos/30 := R/1[%rbx]
+  clos/31 := val[clos/30 + 24]
+  clos/32 := val[clos/31 + 32]
+  clos/33 := val[clos/32 + 32]
+  V/34 := val[clos/30 + 16]
+  V/35 := val[clos/31 + 24]
+  V/36 := val[clos/32 + 24]
+  V/37 := val[clos/33 + 16]
+  R/0[%rax] := V/36
+  R/1[%rbx] := V/35
+  R/2[%rdi] := V/34
+  R/3[%rsi] := arg/29
+  R/4[%rdx] := clos/33
+  tailcall V/37 R/0[%rax] R/1[%rbx] R/2[%rdi] R/3[%rsi] R/4[%rdx]
+*** After instruction selection
+caml_curry3(R/0[%rax] R/1[%rbx])
+  arg/29 := R/0[%rax]
+  clos/30 := R/1[%rbx]
+  V/31 := alloc 48
+  [V/31 + -8] := 5367 (init)
+  I/32 := "caml_curry3_1"
+  val[V/31] := I/32 (init)
+  I/33 := 144115188075855879
+  val[V/31 + 8] := I/33 (init)
+  I/34 := "caml_curry3_1_app"
+  val[V/31 + 16] := I/34 (init)
+  val[V/31 + 24] := arg/29 (init)
+  val[V/31 + 32] := clos/30 (init)
+  R/0[%rax] := V/31
+  return R/0[%rax]
+*** After instruction selection
+caml_curry3_1_app(R/0[%rax] R/1[%rbx] R/2[%rdi])
+  arg2/29 := R/0[%rax]
+  arg3/30 := R/1[%rbx]
+  clos/31 := R/2[%rdi]
+  clos/32 := val[clos/31 + 32]
+  V/33 := val[clos/31 + 24]
+  V/34 := val[clos/32 + 16]
+  R/0[%rax] := V/33
+  R/1[%rbx] := arg2/29
+  R/2[%rdi] := arg3/30
+  R/3[%rsi] := clos/32
+  tailcall V/34 R/0[%rax] R/1[%rbx] R/2[%rdi] R/3[%rsi]
+*** After instruction selection
+caml_curry3_1(R/0[%rax] R/1[%rbx])
+  arg/29 := R/0[%rax]
+  clos/30 := R/1[%rbx]
+  V/31 := alloc 40
+  [V/31 + -8] := 4343 (init)
+  I/32 := "caml_curry3_2"
+  val[V/31] := I/32 (init)
+  I/33 := 72057594037927941
+  val[V/31 + 8] := I/33 (init)
+  val[V/31 + 16] := arg/29 (init)
+  val[V/31 + 24] := clos/30 (init)
+  R/0[%rax] := V/31
+  return R/0[%rax]
+*** After instruction selection
+caml_curry3_2(R/0[%rax] R/1[%rbx])
+  arg/29 := R/0[%rax]
+  clos/30 := R/1[%rbx]
+  clos/31 := val[clos/30 + 24]
+  clos/32 := val[clos/31 + 32]
+  V/33 := val[clos/30 + 16]
+  V/34 := val[clos/31 + 24]
+  V/35 := val[clos/32 + 16]
+  R/0[%rax] := V/34
+  R/1[%rbx] := V/33
+  R/2[%rdi] := arg/29
+  R/3[%rsi] := clos/32
+  tailcall V/35 R/0[%rax] R/1[%rbx] R/2[%rdi] R/3[%rsi]
+*** After instruction selection
+caml_curry2(R/0[%rax] R/1[%rbx])
+  arg/29 := R/0[%rax]
+  clos/30 := R/1[%rbx]
+  V/31 := alloc 40
+  [V/31 + -8] := 4343 (init)
+  I/32 := "caml_curry2_1"
+  val[V/31] := I/32 (init)
+  I/33 := 72057594037927941
+  val[V/31 + 8] := I/33 (init)
+  val[V/31 + 16] := arg/29 (init)
+  val[V/31 + 24] := clos/30 (init)
+  R/0[%rax] := V/31
+  return R/0[%rax]
+*** After instruction selection
+caml_curry2_1(R/0[%rax] R/1[%rbx])
+  arg/29 := R/0[%rax]
+  clos/30 := R/1[%rbx]
+  clos/31 := val[clos/30 + 24]
+  V/32 := val[clos/30 + 16]
+  V/33 := val[clos/31 + 16]
+  R/0[%rax] := V/32
+  R/1[%rbx] := arg/29
+  R/2[%rdi] := clos/31
+  tailcall V/33 R/0[%rax] R/1[%rbx] R/2[%rdi]
+*** After instruction selection
+caml_apply3(R/0[%rax] R/1[%rbx] R/2[%rdi] R/3[%rsi])
+  arg/29 := R/0[%rax]
+  arg/30 := R/1[%rbx]
+  arg/31 := R/2[%rdi]
+  clos/32 := R/3[%rsi]
+  V/33 := val[clos/32 + 8]
+  I/34 := V/33
+  I/34 := I/34 >>s 56
+  if I/34 ==s 3 then
+    V/40 := val[clos/32 + 16]
+    R/0[%rax] := arg/29
+    R/1[%rbx] := arg/30
+    R/2[%rdi] := arg/31
+    R/3[%rsi] := clos/32
+    tailcall V/40 R/0[%rax] R/1[%rbx] R/2[%rdi] R/3[%rsi]
+  else
+    V/35 := val[clos/32]
+    R/0[%rax] := arg/29
+    R/1[%rbx] := clos/32
+    R/0[%rax] := call V/35 R/0[%rax] R/1[%rbx]
+    clos/36 := R/0[%rax]
+    V/37 := val[clos/36]
+    R/0[%rax] := arg/30
+    R/1[%rbx] := clos/36
+    R/0[%rax] := call V/37 R/0[%rax] R/1[%rbx]
+    clos/38 := R/0[%rax]
+    V/39 := val[clos/38]
+    R/0[%rax] := arg/31
+    R/1[%rbx] := clos/38
+    tailcall V/39 R/0[%rax] R/1[%rbx]
+  endif
+*** After instruction selection
+caml_apply2(R/0[%rax] R/1[%rbx] R/2[%rdi])
+  arg/29 := R/0[%rax]
+  arg/30 := R/1[%rbx]
+  clos/31 := R/2[%rdi]
+  V/32 := val[clos/31 + 8]
+  I/33 := V/32
+  I/33 := I/33 >>s 56
+  if I/33 ==s 2 then
+    V/37 := val[clos/31 + 16]
+    R/0[%rax] := arg/29
+    R/1[%rbx] := arg/30
+    R/2[%rdi] := clos/31
+    tailcall V/37 R/0[%rax] R/1[%rbx] R/2[%rdi]
+  else
+    V/34 := val[clos/31]
+    R/0[%rax] := arg/29
+    R/1[%rbx] := clos/31
+    R/0[%rax] := call V/34 R/0[%rax] R/1[%rbx]
+    clos/35 := R/0[%rax]
+    V/36 := val[clos/35]
+    R/0[%rax] := arg/30
+    R/1[%rbx] := clos/35
+    tailcall V/36 R/0[%rax] R/1[%rbx]
+  endif
