@@ -1,0 +1,2 @@
+docker:
+	sudo docker pull 
