@@ -11,7 +11,7 @@ original:
 	../llvmize/_build/install/default/bin/llvmize test1.cmir-cfg-sel -dot -dot-detailed
 
 asm:
-	clang -O3 -c test.ll
+	clang-13 -O3 -c test.ll
 	objdump -D test.o > test.asm
 
 clean:
